@@ -1,0 +1,20 @@
+drive_id  gaps_over_1000_ms  max_gap_ms
+--------  -----------------  ----------
+drive_a   1                  3073      
+drive_b   1                  3124      
+drive_id  clean_rows  min_speed_mps      max_speed_mps     
+--------  ----------  -----------------  ------------------
+drive_a   2968        0.0                19.818            
+drive_b   3181        4.533333333333333  27.830555555555556
+
+Module 2 · silver telemetry
+  PASS  quarantine counts match raw CSV (drive_a)                                expected={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3} got={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3}
+  PASS  clean + quarantined == received (drive_a)                                2968+53=3021
+  PASS  quarantine counts match raw CSV (drive_b)                                expected={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3} got={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3}
+  PASS  clean + quarantined == received (drive_b)                                3181+53=3234
+  PASS  no duplicate (drive, ts) in silver telemetry                             
+  PASS  all speeds in 0..70 m/s                                                  
+  PASS  drive B clock offset removed (first sample within 0.5 s of video start)  2025-10-08 14:30:00.009000+00:00
+
+7/7 checks passed
+{"ok": true}

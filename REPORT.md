@@ -34,12 +34,23 @@ Lần chạy của tôi có **3021 dòng A, 3234 dòng B, 26 trip và 2 video**,
 ### Câu 2
 Pipeline đưa hai nguồn về một schema như thế nào (đơn vị, kiểu thời gian, **độ lệch đồng hồ**)? Bằng chứng nào trong kết quả bước 2 cho thấy đã đúng? Dán bảng quarantine của bạn (số dòng theo từng lý do, từng drive) và giải thích vì sao dòng lỗi vào `rejects` thay vì bị xoá.
 
-(trả lời ở đây)
+Nguồn A ép `ts_utc` thành timestamp có múi giờ và giữ tốc độ m/s; nguồn B đổi tên cột, chia `spd_kmh` cho 3.6 và chia phần trăm bàn đạp cho 100. Timestamp B được tính bằng `to_timestamp((timestamp_ms - offset_ms) / 1000.0)`, với `offset_ms=1500` lấy từ metadata bronze; vì vậy hai nguồn cùng dùng UTC và cùng đồng hồ với video. Ô tốc độ trống được đổi thành NULL bằng `nullif` và `try_cast` trước khi phân loại lỗi.
+
+Trong lần chạy của tôi, B bắt đầu ở **2025-10-08 14:30:00.009000+00:00**, chỉ muộn 9 ms so với video bắt đầu lúc 14:30:00, thay vì lệch khoảng 1.5 giây. Silver có **2968 dòng A và 3181 dòng B**; tốc độ tối đa sau đổi sang km/h và làm tròn lần lượt là **71 và 100**. Module 2 đạt **7/7 checks passed**, gồm kiểm tra không trùng `(drive_id, ts)`, tốc độ trong 0–70 m/s và hiệu chỉnh đồng hồ B.
+
+| Drive | `duplicate` | `speed_missing` | `speed_out_of_range` | Tổng quarantine |
+|---|---:|---:|---:|---:|
+| drive_a | 20 | 30 | 3 | 53 |
+| drive_b | 20 | 30 | 3 | 53 |
+
+Đối chiếu bảo toàn số dòng: **2968 + 53 = 3021** ở A và **3181 + 53 = 3234** ở B; tổng cộng 6149 dòng sạch và 106 dòng quarantine. Bảng `telemetry_rejects` giữ lý do lỗi cùng `_batch_id`, `_row_no`, thời gian và tốc độ để truy vết, xem lại hoặc xử lý sau; xoá dòng lỗi sẽ mất bằng chứng và che khuất chất lượng nguồn. Số liệu được lưu trong [step2_silver_telemetry.txt](report/checkpoints/step2_silver_telemetry.txt).
 
 ### Câu 3
 Vì sao test `max_gap_ms` là `warn` còn `in_range` là `error`? Kết quả thí nghiệm `break-gate` của bạn (`break_gate.json`): test nào bắt được, bao nhiêu dòng, và điều đó cho biết gì về vai trò của "cổng chất lượng"?
 
-(trả lời ở đây)
+`max_gap_ms` trả về khoảng trống giữa các mẫu liên tiếp lớn hơn 1000 ms và được cấu hình `severity: warn`, vì mất tín hiệu cảm biến là thiếu hụt cần báo để theo dõi; bước ghép khung hình sau đó còn kiểm tra độ lệch thời gian. Truy vấn của tôi thấy mỗi drive có một khoảng vượt ngưỡng: lớn nhất **3073 ms ở A** và **3124 ms ở B**. `in_range` kiểm tra tốc độ 0–70 m/s với mức mặc định `error`, vì tốc độ vô lý không được đi vào dữ liệu huấn luyện; task dbt test thất bại sẽ chặn các task downstream trong DAG.
+
+Theo [break_gate.json](report/evidence/break_gate.json), khi nới luật làm sạch lên **1000 m/s**, test **`in_range_silver_telemetry_speed_mps__70__0` bắt 6 dòng**, với kết quả **PASS=5 WARN=1 ERROR=1 SKIP=0**. Ngưỡng kiểm thử vẫn là 70 m/s nên bắt được dữ liệu sai lọt qua bước làm sạch: cổng chất lượng là một kiểm tra riêng, không chỉ lặp lại kết luận của phép biến đổi. Sau khôi phục ngưỡng làm sạch 70 m/s, kết quả trở lại **PASS=6 WARN=1 ERROR=0 SKIP=0**, và kiểm tra module 2 vẫn đạt **7/7**. Đầu ra thí nghiệm và kiểm tra sau khôi phục nằm trong [step2_break_gate.txt](report/checkpoints/step2_break_gate.txt) và [step2_restored_checks.txt](report/checkpoints/step2_restored_checks.txt).
 
 ## Bước 3 · Silver frames
 
