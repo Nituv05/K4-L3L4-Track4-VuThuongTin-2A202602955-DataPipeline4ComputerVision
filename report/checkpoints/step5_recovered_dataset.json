@@ -1,0 +1,8 @@
+{
+  "dataset_version": "be21992bca74",
+  "gold_frames": 1020,
+  "silver_frames": 1246,
+  "unique_frame_ids": 1246,
+  "trip": "trip-03904",
+  "trip_frames": 22
+}

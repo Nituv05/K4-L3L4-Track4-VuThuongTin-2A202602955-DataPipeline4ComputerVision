@@ -1,0 +1,3 @@
+trip_id     total_frames  black  blurry  near_dup  sync_lost
+----------  ------------  -----  ------  --------  ---------
+trip-04622  60            0      0       34        0        

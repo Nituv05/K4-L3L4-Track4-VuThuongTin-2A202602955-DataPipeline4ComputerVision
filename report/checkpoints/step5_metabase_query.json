@@ -1,0 +1,268 @@
+{
+  "question": "Trip nào có tỷ lệ khung bị loại cao nhất? — 2A202602955",
+  "dashboard_url": "http://localhost:3000/dashboard/2",
+  "card_url": "http://localhost:3000/question/46",
+  "sql": "select drive_id, trip_id, frames, frames_kept,\n       frames - frames_kept as frames_dropped,\n       round(100.0 * (frames - frames_kept) / nullif(frames, 0), 2) as dropped_pct,\n       avg_speed_kmh, split\nfrom marts.mart_trip_summary\norder by dropped_pct desc, frames desc, trip_id",
+  "rows": [
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-04622",
+      "frames": 60,
+      "frames_kept": 26,
+      "frames_dropped": 34,
+      "dropped_pct": 56.67,
+      "avg_speed_kmh": 67.1,
+      "split": "val"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-03904",
+      "frames": 22,
+      "frames_kept": 11,
+      "frames_dropped": 11,
+      "dropped_pct": 50.0,
+      "avg_speed_kmh": 46.1,
+      "split": "test"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-02086",
+      "frames": 60,
+      "frames_kept": 32,
+      "frames_dropped": 28,
+      "dropped_pct": 46.67,
+      "avg_speed_kmh": 17.6,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-08888",
+      "frames": 60,
+      "frames_kept": 36,
+      "frames_dropped": 24,
+      "dropped_pct": 40.0,
+      "avg_speed_kmh": 6.5,
+      "split": "test"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-07774",
+      "frames": 34,
+      "frames_kept": 21,
+      "frames_dropped": 13,
+      "dropped_pct": 38.24,
+      "avg_speed_kmh": 12.8,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-06570",
+      "frames": 45,
+      "frames_kept": 32,
+      "frames_dropped": 13,
+      "dropped_pct": 28.89,
+      "avg_speed_kmh": 30.0,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-04871",
+      "frames": 60,
+      "frames_kept": 43,
+      "frames_dropped": 17,
+      "dropped_pct": 28.33,
+      "avg_speed_kmh": 58.3,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-00003",
+      "frames": 60,
+      "frames_kept": 46,
+      "frames_dropped": 14,
+      "dropped_pct": 23.33,
+      "avg_speed_kmh": 63.2,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-08448",
+      "frames": 60,
+      "frames_kept": 46,
+      "frames_dropped": 14,
+      "dropped_pct": 23.33,
+      "avg_speed_kmh": 91.2,
+      "split": "val"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-02097",
+      "frames": 36,
+      "frames_kept": 29,
+      "frames_dropped": 7,
+      "dropped_pct": 19.44,
+      "avg_speed_kmh": 36.2,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-04868",
+      "frames": 60,
+      "frames_kept": 49,
+      "frames_dropped": 11,
+      "dropped_pct": 18.33,
+      "avg_speed_kmh": 65.7,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-02689",
+      "frames": 23,
+      "frames_kept": 19,
+      "frames_dropped": 4,
+      "dropped_pct": 17.39,
+      "avg_speed_kmh": 38.8,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-09608",
+      "frames": 41,
+      "frames_kept": 36,
+      "frames_dropped": 5,
+      "dropped_pct": 12.2,
+      "avg_speed_kmh": 9.2,
+      "split": "val"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-00722",
+      "frames": 60,
+      "frames_kept": 54,
+      "frames_dropped": 6,
+      "dropped_pct": 10.0,
+      "avg_speed_kmh": 96.1,
+      "split": "test"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-03365",
+      "frames": 60,
+      "frames_kept": 54,
+      "frames_dropped": 6,
+      "dropped_pct": 10.0,
+      "avg_speed_kmh": 45.1,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-07900",
+      "frames": 30,
+      "frames_kept": 27,
+      "frames_dropped": 3,
+      "dropped_pct": 10.0,
+      "avg_speed_kmh": 12.4,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-02736",
+      "frames": 60,
+      "frames_kept": 55,
+      "frames_dropped": 5,
+      "dropped_pct": 8.33,
+      "avg_speed_kmh": 89.8,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-06667",
+      "frames": 29,
+      "frames_kept": 27,
+      "frames_dropped": 2,
+      "dropped_pct": 6.9,
+      "avg_speed_kmh": 60.5,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-05297",
+      "frames": 31,
+      "frames_kept": 29,
+      "frames_dropped": 2,
+      "dropped_pct": 6.45,
+      "avg_speed_kmh": 27.3,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-02134",
+      "frames": 60,
+      "frames_kept": 57,
+      "frames_dropped": 3,
+      "dropped_pct": 5.0,
+      "avg_speed_kmh": 65.1,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-05905",
+      "frames": 60,
+      "frames_kept": 57,
+      "frames_dropped": 3,
+      "dropped_pct": 5.0,
+      "avg_speed_kmh": 51.9,
+      "split": "val"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-04237",
+      "frames": 60,
+      "frames_kept": 59,
+      "frames_dropped": 1,
+      "dropped_pct": 1.67,
+      "avg_speed_kmh": 65.7,
+      "split": "test"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-04324",
+      "frames": 60,
+      "frames_kept": 60,
+      "frames_dropped": 0,
+      "dropped_pct": 0.0,
+      "avg_speed_kmh": 81.9,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-01037",
+      "frames": 44,
+      "frames_kept": 44,
+      "frames_dropped": 0,
+      "dropped_pct": 0.0,
+      "avg_speed_kmh": 91.5,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_b",
+      "trip_id": "trip-09209",
+      "frames": 37,
+      "frames_kept": 37,
+      "frames_dropped": 0,
+      "dropped_pct": 0.0,
+      "avg_speed_kmh": 80.2,
+      "split": "train"
+    },
+    {
+      "drive_id": "drive_a",
+      "trip_id": "trip-07304",
+      "frames": 34,
+      "frames_kept": 34,
+      "frames_dropped": 0,
+      "dropped_pct": 0.0,
+      "avg_speed_kmh": 32.7,
+      "split": "train"
+    }
+  ]
+}

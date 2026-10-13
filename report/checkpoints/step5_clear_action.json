@@ -1,0 +1,39 @@
+{
+  "dialog": "Clear and Retry\n\nTask:silver_frames\n\nRun:cp5_fail_once\n\nMap Index:9\n\nInclude:\n\nPast\nFuture\nUpstream\nDownstream\nRecursive\nOnly Failed\nAffected Tasks: 8\nCancel\nClear",
+  "requests": [
+    {
+      "url": "http://localhost:8080/clear",
+      "body": {
+        "dag_id": "day09_video_pipeline",
+        "dag_run_id": "cp5_fail_once",
+        "confirmed": "false",
+        "execution_date": "2026-10-13T02:41:07.676093+00:00",
+        "past": "false",
+        "future": "false",
+        "upstream": "false",
+        "downstream": "true",
+        "recursive": "true",
+        "only_failed": "false",
+        "task_id": "silver_frames",
+        "map_index": "9"
+      }
+    },
+    {
+      "url": "http://localhost:8080/clear",
+      "body": {
+        "dag_id": "day09_video_pipeline",
+        "dag_run_id": "cp5_fail_once",
+        "confirmed": "true",
+        "execution_date": "2026-10-13T02:41:07.676093+00:00",
+        "past": "false",
+        "future": "false",
+        "upstream": "false",
+        "downstream": "true",
+        "recursive": "true",
+        "only_failed": "false",
+        "task_id": "silver_frames",
+        "map_index": "9"
+      }
+    }
+  ]
+}
