@@ -57,18 +57,24 @@ Theo [break_gate.json](report/evidence/break_gate.json), khi nới luật làm s
 ### Câu 4
 Dựa vào `idempotency.json`: số dòng trước và sau hai lần chạy lại, và khi ghi kiểu `append`. Vì sao Delta `overwrite` theo partition (một trip) an toàn hơn xoá rồi ghi lại, nhất là khi giữa chừng có lỗi?
 
-(trả lời ở đây)
+Tôi chạy thí nghiệm với **`trip-03904`**: [idempotency.json](report/evidence/idempotency.json) ghi **1246 dòng trước và 1246 dòng sau hai lần chạy lại**, cùng dấu vân tay **`cb6118dbb0b8`**, `unchanged=true`. Trip này có **22 khung hình**; ghi bằng `append` hai lần vào bảng thử tạo **44 dòng**, tức nhân đôi. Dấu vân tay kiểm tra ID khung hình, trip, độ sáng, độ nét và dHash; nó không tính `_processed_at`, vốn thay đổi theo lần xử lý.
+
+Mã thực tế dùng `mode="overwrite"` với predicate `trip_id = 'trip-03904'` để thay thế đúng tập dòng của trip; bảng Delta được phân vùng vật lý theo **`drive_id`**, còn trip là đơn vị chạy lại. Delta ghi file mới rồi commit một phiên bản bảng trong giao dịch: trước commit, người đọc vẫn thấy snapshot đã commit; lỗi trước commit không làm mất tập dòng cũ. Nếu xoá rồi ghi bằng hai thao tác riêng, lỗi sau xoá có thể để bảng thiếu dữ liệu. Cơ chế snapshot và commit được mô tả trong [tài liệu Delta Lake](https://docs.delta.io/concurrency-control/). Đây là bảo đảm cho bảng Delta; ảnh JPG được ghi vào các URI cố định trước đó và không cùng một giao dịch với bảng.
 
 ### Câu 5
 Khung hình **đen** và khung hình **tối** khác nhau thế nào, pipeline xử lý khác nhau ra sao, bạn có đồng ý không? Dựa vào `threshold.json`: nếu chọn ngưỡng 0, 2, 6 thì bao nhiêu khung bị coi là trùng ở mỗi drive? Bạn chọn ngưỡng nào, vì sao, và ngưỡng đó phụ thuộc vào tốc độ xe thế nào?
 
 | dHash khác tối đa | số khung trùng, drive A | số khung trùng, drive B |
 |---|---|---|
-| 0 | | |
-| 2 | | |
-| 6 | | |
+| 0 | 60 | 8 |
+| 2 | 149 | 52 |
+| 6 | 363 | 244 |
 
-(trả lời ở đây)
+Pipeline coi khung **đen** là độ sáng trung bình <12, còn khung **tối** là từ 12 đến dưới 40; đen bị loại khỏi gold, tối chỉ được gắn cờ và vẫn có thể giữ nếu đạt các luật khác. Lần chạy của tôi có **6 khung đen ở A, 4 ở B**, cùng **4 khung tối ở A và 61 ở B**. Áp dụng các điều kiện giữ của gold thì **4/4 khung tối A và 58/61 khung tối B** đủ điều kiện; cờ tối không bảo đảm mọi khung đều được giữ. Ảnh mẫu `drive_b-00030` dưới cầu vẫn thấy đường và cảnh phía trước dù phần lớn ảnh tối. Tôi đồng ý giữ những cảnh này để dataset phản ánh cả bóng râm và thiếu sáng trong thực tế.
+
+Theo [threshold.json](report/evidence/threshold.json), ngưỡng 0, 2 và 6 cho số khung trùng ở bảng trên; mỗi khung được so với khung trước trong cùng trip, không so giữa hai trip. Tôi chọn **2 bit** làm mức cân bằng: ngưỡng 0 dễ giữ lại khung gần giống do nhiễu nhỏ, còn ngưỡng 6 coi **607/1246 khung** là trùng, có nguy cơ mất biến thiên hữu ích. Ở tốc độ lấy mẫu 2 fps, xe chạy chậm làm cảnh giữa hai khung thay đổi ít nên dễ bị đánh dấu trùng; xe chạy nhanh thường làm cảnh thay đổi nhiều hơn. Vì vậy khi đổi tốc độ xe hoặc fps, cần xem lại ngưỡng và ảnh thực tế; thí nghiệm này chưa chứng minh một ngưỡng tối ưu cho mọi chuyến.
+
+Bước 3 xử lý **26 trip, 1246 khung hình** (602 A, 644 B), đạt **6/6 kiểm tra** và **9/9 unit test**. A có 9 khung mờ, B có 0; 8/8 khung trong đoạn cố ý làm mờ và 11/12 khung trong đoạn camera đứng hình được phát hiện. ASOF join chọn telemetry gần nhất tại hoặc trước event time của khung hình: độ trễ trung bình làm tròn là **66 ms ở A, 73 ms ở B**, lớn nhất **2884 và 3112 ms**; mỗi drive có 7 khung không đạt dung sai 150 ms. Số cờ có thể chồng lấp, nên không cộng chúng để tính tổng khung bị loại. Bằng chứng bổ sung ở [step3_silver_frames.txt](report/checkpoints/step3_silver_frames.txt), [step3_unit_tests.txt](report/checkpoints/step3_unit_tests.txt) và [step3_quality_details.txt](report/checkpoints/step3_quality_details.txt).
 
 ## Bước 4 · Gold
 

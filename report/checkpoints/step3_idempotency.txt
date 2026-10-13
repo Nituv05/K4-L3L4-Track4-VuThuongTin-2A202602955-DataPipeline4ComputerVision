@@ -1,0 +1,10 @@
+THÍ NGHIỆM 1 · Chạy lại partition trip-03904
+
+Cách của pipeline (Delta overwrite theo predicate trip_id):
+  trước : 1246 dòng, dấu vân tay cb6118dbb0b8
+  sau 2 lần chạy lại: 1246 dòng, dấu vân tay cb6118dbb0b8   -> KHÔNG ĐỔI
+
+Cách sai (append, chạy 2 lần, chỉ một trip): 44 dòng cho một trip có 22 khung -> NHÂN ĐÔI (2x)
+
+bằng chứng đã ghi: /opt/lab/report/evidence/idempotency.json
+{"ok": true}

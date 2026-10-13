@@ -1,0 +1,15 @@
+drive_id  total_frames  dark_flagged  dark_eligible_for_gold  black_flagged  eligible_for_gold
+--------  ------------  ------------  ----------------------  -------------  -----------------
+drive_a   602           4             4                       6              436              
+drive_b   644           61            58                      4              584              
+
+Module 3 · silver frames
+  PASS  frame_id unique                                   1246 frames
+  PASS  black frames detected (drive_a)                   6/6
+  PASS  black frames detected (drive_b)                   4/4
+  PASS  blurry frames detected (drive_a)                  8/8
+  PASS  frozen camera = near-duplicate frames (drive_a)   11/12
+  PASS  low-light frames flagged but not black (drive_b)  10/10
+
+6/6 checks passed
+{"ok": true}
