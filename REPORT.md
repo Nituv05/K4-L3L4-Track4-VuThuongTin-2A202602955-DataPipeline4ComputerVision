@@ -4,10 +4,12 @@
 
 | | |
 |---|---|
-| Họ và tên | `<điền>` |
-| MSSV (đúng bằng `LAB_STUDENT_ID` trong `.env`) | `<điền>` |
-| GitHub | `<điền: tên tài khoản>` |
-| Trip dùng cho bài tập sập và chạy lại (xem GUIDE, bước 5) | `<điền: trip-xxxxx>` |
+| Họ và tên | Vũ Thường Tín |
+| MSSV (đúng bằng `LAB_STUDENT_ID` trong `.env`) | 2A202602955 |
+| GitHub | Nituv05 |
+| Trip dùng cho bài tập sập và chạy lại (xem GUIDE, bước 5) | trip-03904 |
+
+MSSV chứa chữ nên tôi giữ nguyên `2A202602955` cho `LAB_STUDENT_ID` và việc chia dataset; riêng công thức chọn trip dùng phần số `202602955 % 26 = 9`, tương ứng `trip-03904` trong danh sách đã sắp xếp của `cli list-trips` (chỉ số bắt đầu từ 0).
 
 ## Kết quả cuối
 
@@ -21,7 +23,11 @@
 ### Câu 1
 Liệt kê **ít nhất 4 khác biệt** giữa telemetry nguồn A và nguồn B mà bạn thấy ở bronze. Vì sao pipeline giữ **mỗi nguồn một bảng bronze** và để mọi cột ở dạng chữ, thay vì gộp và ép kiểu ngay?
 
-(trả lời ở đây)
+Tôi thấy nguồn A dùng `ts_utc` dạng ISO UTC (ví dụ `2025-10-07T08:00:00.014Z`), còn B dùng `timestamp_ms` dạng epoch mili giây (`1759933801509`). A có `speed_mps` theo m/s, B có `spd_kmh` theo km/h. Tên cột hướng và GPS cũng khác: `heading_deg`, `lat`, `lon` ở A tương ứng `hdg`, `latitude`, `longitude` ở B. Bàn đạp A dùng `gas`, `brake` theo tỷ lệ, còn B dùng `throttle_pct`, `brake_pct` theo phần trăm; ví dụ gas A là `0.028`, throttle B là `2.0`. Theo manifest nguồn, đồng hồ A không lệch, còn B lệch +1500 ms so với video.
+
+Giữ mỗi nguồn trong một bảng bronze giúp lưu đúng schema nhận được để kiểm tra và xử lý schema drift ở bước sau. Các giá trị CSV được giữ dạng chuỗi, kể cả ô trống, nên dữ liệu sai kiểu hoặc thiếu không bị mất khi ép kiểu sớm; silver mới chuẩn hoá và cách ly dòng lỗi. Quy tắc dạng chuỗi áp dụng cho cột dữ liệu CSV; cột lineage `_row_no` là số nguyên và `_ingested_at` là timestamp. Video gốc được lưu riêng trong object storage, còn bảng metadata giữ URI và SHA256 để nhận diện lô đã nạp.
+
+Lần chạy của tôi có **3021 dòng A, 3234 dòng B, 26 trip và 2 video**, đạt **5/5 checks passed** ở module 1. Nạp lại cả A, B và trips đều báo `already present`; lịch sử mỗi bảng telemetry chỉ có một commit `version=0`, lần lượt thêm 3021 và 3234 dòng. Điều này cho thấy nhận diện theo batch SHA256 giúp chạy lại không tăng số dòng. Đầu ra thực tế được lưu tại [step1_bronze.txt](report/checkpoints/step1_bronze.txt) và [step1_bronze_details.txt](report/checkpoints/step1_bronze_details.txt).
 
 ## Bước 2 · Silver telemetry
 
