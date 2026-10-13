@@ -13,8 +13,8 @@ MSSV chứa chữ nên tôi giữ nguyên `2A202602955` cho `LAB_STUDENT_ID` và
 
 ## Kết quả cuối
 
-- `dataset_version` của bạn: `<điền>`  (phải khớp `report/evidence/run_summary.json`)
-- Số khung hình train / val / test của bạn: `<điền>`
+- `dataset_version` của bạn: `be21992bca74` (đã kiểm tra ở checkpoint 4; sẽ đối chiếu `report/evidence/run_summary.json` ở checkpoint cuối).
+- Số khung hình train / val / test của bạn: **695 / 165 / 160** (tổng 1020).
 - `report/verify.txt`: tạo bằng `python3 scripts/check_submission.py --save-verify` (phải có `27/27 checks passed`).
 - Ảnh chụp trong `report/screenshots/`: `airflow_graph.png`, `minio_lake.png`, `metabase_dashboard.png`, và ảnh bài tập sập/chạy lại (log task đỏ thấy trip của bạn).
 
@@ -81,17 +81,34 @@ Bước 3 xử lý **26 trip, 1246 khung hình** (602 A, 644 B), đạt **6/6 ki
 ### Câu 6
 Dựa vào `leakage.json`: chia theo khung hình làm bao nhiêu trip bị chia cắt, so với chia theo trip? Vì sao điều này làm điểm kiểm thử đẹp một cách giả tạo?
 
-(trả lời ở đây)
+Theo [leakage.json](report/evidence/leakage.json), **1020 khung hợp lệ thuộc 26 trip** được đưa vào thí nghiệm: chia theo khung hình làm **26/26 trip nằm ở nhiều split**, và **26/26 trip có khung ở cả train lẫn test**. Gold chia theo trip có **0 trip bị chia cắt**. Mỗi drive có 9 trip train, 2 val và 2 test; tổng cộng **18/4/4 trip**, tương ứng **695/165/160 khung**. Tỷ lệ 70/15/15 được áp dụng lên số trip và làm tròn theo từng drive, nên tỷ lệ khung không nhất thiết đúng 70/15/15.
+
+Các khung liền nhau trong cùng chuyến chia sẻ cảnh, ánh sáng và quỹ đạo; nếu chia chúng sang train và test, mô hình có thể được chấm trên cảnh gần giống cảnh đã học thay vì chuyến mới. Điểm test vì thế có thể cao giả tạo so với khả năng tổng quát hoá. Thí nghiệm này đo sự giao nhau của trip, chưa huấn luyện mô hình nên không đưa ra mức tăng điểm cụ thể. Chia theo trip tránh kiểu rò rỉ này nhưng chưa bảo đảm các trip khác nhau không đi cùng tuyến đường.
 
 ### Câu 7
 Vì sao `dataset_version` là **băm nội dung** chứ không phải ngày giờ hay số đếm? Hai lần chạy liên tiếp cho kết quả gì? Vì sao `dataset_version` của bạn **khác** bạn bè dù cùng dữ liệu (liên hệ MSSV)?
 
-(trả lời ở đây)
+Trong mã của lab, version là **12 ký tự đầu của SHA256** từ các dòng `frame_id|split` được sắp xếp theo `frame_id`. Cùng tập khung và cách chia split sẽ tạo cùng version dù chạy lúc khác; ngày giờ hoặc số đếm sẽ đổi chỉ vì chạy lại và không nhận diện được nội dung tương đương. Lần tạo đầu và lần `export-dataset` kế tiếp của tôi đều cho **`be21992bca74`**, **1020 khung**, split **695/165/160**. Tôi cũng tính lại băm từ bảng Delta gold và xác nhận trùng version.
+
+MSSV được nối với `trip_id` khi tính MD5 để xếp thứ tự trip trong mỗi drive. Khi thử mã **`2A202602956`** bằng biến môi trường cho riêng lệnh chạy, version đổi thành **`a419c86bfddd`**, split thành **700/167/153**; tổng khung và số trip mỗi split vẫn giữ nguyên. Chạy lại bằng mã chính thức **`2A202602955`** khôi phục **`be21992bca74`** và **695/165/160**, đạt **7/7 kiểm tra**. Hai mã trong thí nghiệm cho version khác nhau vì thay đổi việc gán split; không phải chỉ băm trực tiếp MSSV. Bằng chứng ở [step4_export_repeat.txt](report/checkpoints/step4_export_repeat.txt), [step4_student_id_variant.txt](report/checkpoints/step4_student_id_variant.txt) và [step4_student_id_restored.txt](report/checkpoints/step4_student_id_restored.txt).
+
+Giới hạn: version này băm **ID khung và split**, không băm toàn bộ ảnh, nhãn hay metadata. Thay nội dung ảnh dưới cùng ID mà không đổi split có thể giữ nguyên version; vì vậy phải đọc thêm SHA256 và lineage để truy nguồn. `created_at` và phiên bản commit Delta cũng có thể đổi trong khi dataset version giữ nguyên.
 
 ### Câu 8
 Đọc phần `lineage` trong `manifest.json` của dataset bạn. Trả lời "dataset này được tạo từ dữ liệu nào?" bằng chính nội dung đó. Nếu một người hỏi 3 tháng sau, thông tin nào giúp tái tạo lại đúng dataset này?
 
-(trả lời ở đây)
+Manifest của **`be21992bca74`** tại checkpoint 4 được lưu nguyên bản ở [step4_manifest.json](report/checkpoints/step4_manifest.json). Nó ghi **1020 khung**, gồm **436 của drive A và 584 của B**, và các phiên bản bảng upstream sau:
+
+| Bảng upstream | Delta version tại checkpoint 4 |
+|---|---:|
+| `bronze.raw_telemetry_a`, `bronze.raw_telemetry_b`, `bronze.trips_raw` | 0 |
+| `bronze.video_files` | 1 |
+| `silver.frames` | 27 |
+| `silver.telemetry`, `silver.frames_flagged`, `silver.frame_telemetry` | 0 |
+
+SHA256 video A là `636ba1a98dfc5ba665d1c935e1d2064e69f4df360ff9ffbd15795957d5e7e9aa`; video B là `bfa62703f645ff77a8578ae3fc74a00881140d38a404d43c8e2af265bbee9fdc`. Các luật trong manifest loại `is_black`, `is_blurry`, `is_near_dup`, `not sync_ok` và chia theo trip, phân tầng theo drive với thứ tự MD5. `silver.frames` ở version 27 vì đã có 26 lần ghi trip ban đầu và hai lần chạy lại trong thí nghiệm idempotency; số commit tăng không đồng nghĩa số khung tăng.
+
+Để tái tạo sau 3 tháng, cần giữ dữ liệu gốc khớp SHA256 trong `data/MANIFEST.json`, manifest dataset, mã và cấu hình pipeline, các dependency cùng MSSV **`2A202602955`**. Nếu giữ lịch sử Delta thì dùng phiên bản upstream để đọc đúng snapshot; nếu dựng lại từ lake trống, số phiên bản commit có thể khác nhưng tập `frame_id|split` và version dataset phải khớp. `manifest_sha256` **`458331e2c4e99601dcc2f26828dfb059bd2f3de389efd72707c8cc91ed35fae1`** kiểm tra file manifest Parquet của lần xuất này, không phải SHA256 của mọi ảnh. Khi chạy lại từ lake trống ở checkpoint cuối, sẽ đối chiếu lineage mới với snapshot checkpoint 4 này.
 
 ## Bước 5 · Điều phối và phục vụ
 
